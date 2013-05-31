@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title></title>
+	<style type="text/css">
+		
+	</style>
+</head>
+
+<body>
+	<input type="button" onclick="alert.add('111|'+alert.getCount());" value="click me"/>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+</body>
+<script type="text/javascript" src="alertInfo.js"></script>
+<script type="text/javascript">
+	// //var s='?list=1&menu=2&nav=1';
+	// //var s='?menu=3&list=3&nav=5';
+
+	 var s='?menu=2&nav=1&list=1';
+	// //var s='?list=1';
+	// //匹配'list='或加上任意数字或加上'&'
+	// //或者以'&'加上'list='或加上任意数字
+	var reg=/\&list=\d*|list=\d*\&*/;
+
+	 s=s.replace(reg,'');
+	//alert(s)
+	var alert=new alertInfo();
+	alert.add('111');
+	//alertInfo1.addListener('mouseover',function(){});
+	//alert();
+	function $ (id) {
+		if(typeof id=='string')return document.getElementById(id);
+		if(typeof id=='object')return id;
+	}
+
+</script>
+</html>

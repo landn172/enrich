@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<title>行拖动</title>
+<script>
+/*在开发拖动效果时，有一个非常恼人的地方要处理时，就是拖动时，
+*文本被选中蓝色一片，容易造成用户分心，有损用户体验。
+*如何使用js实现防止页面内容被选中。
+*可以通过对元素的属性onselectstart="return false"来禁止用户选中网页上的某一元素内容，在firefox下可以通过样式：-moz-user-select: none;来控制 。
+最新CSS3中的user-select也可以实现禁止用户选中，不过FF与webkit系浏览器是支持它的，IE9与opera11是不支持，所以用它之前先要判断浏览器的类型。
+下面给你个网上比较完整的例子，你可参考一下：
+**/
+      window.onload = function(){
+        //绑定事件
+        var addEvent = document.addEventListener ? function(el,type,callback){
+          el.addEventListener( type, callback, !1 );
+        } : function(el,type,callback){
+          el.attachEvent( "on" + type, callback );
+        }
+        //判定对样式的支持
+        var getStyleName= (function(){
+          var prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-'];
+          var reg_cap = /-([a-z])/g;
+          function getStyleName(css, el) {
+            el = el || document.documentElement;
+            var style = el.style,test;
+            for (var i=0, l=prefixes.length; i < l; i++) {
+              test = (prefixes[i] + css).replace(reg_cap,function($0,$1){
+                alert(prefixes[i] + css+'||'+$0+'||'+$1)
+                return $1.toUpperCase();
+              });
+              if(test in style){
+                return test;
+              }
+            }
+            return null;
+          }
+          return getStyleName;
+        })();
+        var userSelect = getStyleName("user-select");
+
+        //精确获取样式
+        var getStyle = document.defaultView ? function(el,style){
+          return document.defaultView.getComputedStyle(el, null).getPropertyValue(style)
+        } : function(el,style){
+          style = style.replace(/\-(\w)/g, function($, $1){
+            alert($1);
+            return $1.toUpperCase();
+          });
+          return el.currentStyle[style];
+        }
+        var dragManager = {
+          y:0,
+
+          dragStart:function(e){
+            e = e || event;
+            var handler = e.target || e.srcElement;
+            if(handler.nodeName === "TD"){
+              handler = handler.parentNode;
+              dragManager.handler = handler;
+              if(!handler.getAttribute("data-background")){
+                handler.setAttribute("data-background",getStyle(handler,"background-color"))
+              }
+              //显示为可移动的状态
+              handler.style.backgroundColor = "#ccc";
+              handler.style.cursor = "move";
+              dragManager.y = e.clientY;
+              
+              if(typeof userSelect === "string"){
+                return document.documentElement.style[userSelect] = "none";
+              }
+              document.unselectable  = "on";
+              document.onselectstart = function(){
+                return false;
+              }
+            }
+          },
+          draging:function(e){//mousemove时拖动行
+            var handler = dragManager.handler;
+            if(handler){
+              e = e || event;
+       
+              var y = e.clientY;
+              var down = y > dragManager.y;//是否向下移动
+              var tr = document.elementFromPoint(e.clientX,e.clientY);
+              if(tr && tr.nodeName == "TD"){
+                tr = tr.parentNode
+                dragManager.y = y;
+                if( handler !== tr){
+                  tr.parentNode.insertBefore(handler, (down ? tr.nextSibling : tr));
+                }
+              };
+            }
+          },
+          dragEnd:function(){
+            var handler = dragManager.handler
+            if (handler) {
+              handler.style.backgroundColor = handler.getAttribute("data-background");
+              handler.style.cursor = "default";
+              dragManager.handler = null;
+             
+            }
+              if(typeof userSelect === "string"){
+                return document.documentElement.style[userSelect] = "text";
+              }
+              document.unselectable  = "off";
+              document.onselectstart = null;
+          },
+          main:function(el){
+            addEvent(el,"mousedown",dragManager.dragStart);
+            addEvent(document,"mousemove",dragManager.draging);
+            addEvent(document,"mouseup",dragManager.dragEnd);
+
+          }
+        }
+        var el = document.getElementById("table");
+        dragManager.main(el);
+
+      }
+
+    </script>
+<style>
+.table{width:60%;border: 1px solid red;border-collapse: collapse;}
+.table td{border: 1px solid red;height: 20px;}
+</style>
+</head>
+<body>
+<h1>行拖动</h1>
+<table  id="table" class="table">
+<tbody>
+<tr><td>1</td><td>One</td><td>dom.require</td></tr>
+<tr id="2" ><td class="2">2</td><td>Two</td><td>ControlJS </td></tr>
+<tr id="3" ><td class="3">3</td><td>Three</td><td>HeadJS</td></tr>
+<tr id="4" ><td class="4">4</td><td>Four</td><td>LAB.js</td></tr>
+<tr id="5" ><td class="5">5</td><td>Five</td><td>$script.js</td></tr>
+<tr id="6" ><td class="6">6</td><td>Six</td><td>NBL.js</td></tr>
+</tbody>
+</table>
+</body>
+</html>
